@@ -1,0 +1,10 @@
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { UsuariosService } from '../services/usuarios.service';
+
+export const authGuard: CanActivateFn = (route, state) => {
+  const usuarioLogado = inject(UsuariosService).isUsuarioLogado();
+  const router = inject(Router);
+  if (!usuarioLogado) router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+  return usuarioLogado;
+};

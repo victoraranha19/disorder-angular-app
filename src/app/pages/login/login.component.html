@@ -1,0 +1,39 @@
+<div class="login-container">
+  <mat-tab-group>
+    <mat-tab label="Entrar">
+      <form [action]="logar()">
+        <mat-form-field>
+          <mat-label>Usuário</mat-label>
+          <input matInput placeholder="Digite seu usuário" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Senha</mat-label>
+          <input matInput type="password" placeholder="Digite sua senha" />
+        </mat-form-field>
+        <button mat-stroked-button type="submit">Entrar</button>
+      </form>
+    </mat-tab>
+
+    <mat-tab label="Criar Conta">
+      <form (ngSubmit)="criarConta()">
+        <mat-form-field>
+          <mat-label>Nome completo</mat-label>
+          <input matInput placeholder="Digite seu nome completo" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Usuário</mat-label>
+          <input matInput placeholder="Digite seu usuário" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Nova Senha</mat-label>
+          <input matInput type="password" placeholder="Digite sua senha" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Confirmar Senha</mat-label>
+          <input matInput type="password" placeholder="Digite novamente sua senha" />
+        </mat-form-field>
+        <button mat-stroked-button type="submit">Criar</button>
+      </form>
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -1,0 +1,24 @@
+// Estilos material
+@use '@angular/material' as mat;
+
+mat-drawer {
+  @include mat.sidenav-overrides(
+    (
+      container-width: 300px,
+    )
+  );
+}
+
+mat-list {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.list-item {
+  display: flex;
+  gap: 8px;
+}
