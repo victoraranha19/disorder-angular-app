@@ -15,21 +15,21 @@ import { IUsuario } from '../../shared/interfaces';
   providers: [UsuariosService],
 })
 export class LoginComponent implements OnInit {
-  #usuarioService = inject(UsuariosService);
+  #usuariosService = inject(UsuariosService);
 
   usuarios: IUsuario[] = [];
   usuario = '';
 
   ngOnInit() {
-    this.#usuarioService.listar().subscribe((data) => {
+    this.#usuariosService.listar().subscribe((data) => {
       this.usuarios = data;
     });
   }
 
   logar() {
-    this.#usuarioService.logar();
+    this.#usuariosService.logar();
   }
   criarConta() {
-    this.#usuarioService.logar();
+    this.#usuariosService.logar();
   }
 }
