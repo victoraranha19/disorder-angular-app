@@ -4,11 +4,11 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angul
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
+import { Observable, switchMap, tap } from 'rxjs';
 
 import { CarteiraComponent } from '../../components/carteira/carteira.component';
 import { CarteirasService } from '../../services/carteiras.service';
 import { ICarteira } from '../../shared/interfaces';
-import { Observable, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-carteiras',

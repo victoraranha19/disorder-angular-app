@@ -44,7 +44,9 @@ export interface ITransacao {
   dataTransacao: Date;
   tipo: ETipoTransacao; // 'C' | 'D'
   idCategoria?: number;
+  tituloCategoria?: string;
   idCarteira?: number;
+  tituloCarteira?: string;
   idUsuario: number;
   ativo: boolean;
 }

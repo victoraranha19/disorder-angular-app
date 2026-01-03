@@ -3,7 +3,9 @@
     <mat-list style="justify-content: space-between">
       <mat-nav-list dense>
         <h1 mat-subheader>Disorder App</h1>
-        <div style="padding: 16px 0"><mat-divider /></div>
+        <div style="padding: 16px 0">
+          <mat-divider />
+        </div>
         <a mat-list-item [routerLink]="['/', 'transacoes']">
           <div class="list-item">
             <mat-icon>timeline</mat-icon>
@@ -13,13 +15,13 @@
         <a mat-list-item [routerLink]="['/', 'transacoes']">
           <div class="list-item">
             <mat-icon>payments</mat-icon>
-            <span>Transações</span>
+            <span>Minhas Transações</span>
           </div>
         </a>
         <a mat-list-item [routerLink]="['/', 'carteiras']">
           <div class="list-item">
             <mat-icon>wallet</mat-icon>
-            <span>Minhas Carteiras</span>
+            <span>Carteiras</span>
           </div>
         </a>
         <a mat-list-item [routerLink]="['/', 'categorias']">
@@ -36,8 +38,11 @@
         </a>
       </mat-nav-list>
       <mat-nav-list dense>
-        <div style="padding: 16px 0"><mat-divider /></div>
-        <a mat-list-item tabindex="0" (click)="toggleTheme()" (keyup.enter)="toggleTheme()" (keyup.space)="toggleTheme()">
+        <div style="padding: 16px 0">
+          <mat-divider />
+        </div>
+        <a mat-list-item tabindex="0" (click)="toggleTheme()" (keyup.enter)="toggleTheme()"
+           (keyup.space)="toggleTheme()">
           <div class="list-item">
             <mat-icon>bedtime</mat-icon>
             <span>Alterar Tema</span>

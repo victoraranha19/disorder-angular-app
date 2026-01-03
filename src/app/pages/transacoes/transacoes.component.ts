@@ -1,33 +1,64 @@
 import { Component, inject, LOCALE_ID, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
-import { ETipoTransacao, ITransacao } from '../../shared/interfaces';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { Observable, switchMap, tap } from 'rxjs';
-import { TransacoesService } from '../../services/transacoes.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import localePt from '@angular/common/locales/pt';
+import { MatTableModule } from '@angular/material/table';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { Observable, switchMap, tap } from 'rxjs';
+
+import { ETipoTransacao, ICarteira, ICategoria, ITransacao } from '../../shared/interfaces';
+import { TransacoesService } from '../../services/transacoes.service';
+import { CarteirasService } from '../../services/carteiras.service';
+import { CategoriasService } from '../../services/categorias.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 registerLocaleData(localePt);
 
 @Component({
   selector: 'app-transacoes',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatInputModule],
-  providers: [ { provide: LOCALE_ID, useValue: 'pt-PT' } ],
+  imports: [
+    // Angular
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    // Material
+    MatButtonModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatIconModule,
+    MatTableModule,
+  ],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'pt-PT' },
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-PT' },
+  ],
   templateUrl: './transacoes.component.html',
   styleUrl: './transacoes.component.scss',
 })
 export class TransacoesComponent implements OnInit {
   modalGasto = viewChild.required<TemplateRef<HTMLDivElement>>('templateModalGasto');
 
+  public readonly ETipoTransacao = ETipoTransacao;
+
   #matDialog = inject(MatDialog);
   #gastosService = inject(TransacoesService);
+  #carteirasService = inject(CarteirasService);
+  #categoriasService = inject(CategoriasService);
 
   private readonly _hoje = new Date();
   mesSelecionado = new Date(this._hoje.getFullYear(), this._hoje.getMonth());
   #dialogRef?: MatDialogRef<HTMLDivElement>;
+  ganhos = signal<ITransacao[]>([]);
   gastos = signal<ITransacao[]>([]);
+  carteirasOptions = signal<ICarteira[]>([]);
+  categoriasOptions = signal<ICategoria[]>([]);
 
   gastoForm = new FormGroup({
     id: new FormControl<number>(0, { nonNullable: true }),
@@ -41,17 +72,26 @@ export class TransacoesComponent implements OnInit {
 
   ngOnInit(): void {
     this._atualizarGastos$().subscribe();
+
+    this.#carteirasService.listar().subscribe((data) => {
+      this.carteirasOptions.set(data);
+    });
+    this.#categoriasService.listar().subscribe((data) => {
+      this.categoriasOptions.set(data);
+    });
   }
 
-  public abrirModal(gasto?: ITransacao): void {
+  public abrirModal(gasto?: ITransacao, tipo: ETipoTransacao = ETipoTransacao.DEBITO): void {
     this.gastoForm.reset();
     this.#dialogRef?.close();
 
+    this.gastoForm.controls.tipo.setValue(tipo);
+
     if (gasto) {
       this.gastoForm.controls.id.setValue(gasto.id);
-      this.gastoForm.controls.descricao.setValue(gasto.descricao);
-      this.gastoForm.controls.valor.setValue(gasto.valor);
       this.gastoForm.controls.tipo.setValue(gasto.tipo);
+      this.gastoForm.controls.valor.setValue(gasto.valor);
+      this.gastoForm.controls.descricao.setValue(gasto.descricao);
       this.gastoForm.controls.dataTransacao.setValue(gasto.dataTransacao);
       this.gastoForm.controls.idCarteira.setValue(gasto.idCarteira ?? null);
       this.gastoForm.controls.idCategoria.setValue(gasto.idCategoria ?? null);
@@ -61,10 +101,14 @@ export class TransacoesComponent implements OnInit {
 
   public salvarGasto(): void {
     this.#dialogRef?.close();
+
+    const categoria = this.categoriasOptions().find((c) => c.id === this.gastoForm.controls.idCategoria.value);
+    const carteira = this.carteirasOptions().find((c) => c.id === this.gastoForm.controls.idCarteira.value);
+
     if (this.gastoForm.controls.id.value > 0) {
-      this._editarCategoria();
+      this._editarCategoria(carteira, categoria);
     } else {
-      this._adicionarGasto();
+      this._adicionarGasto(carteira, categoria);
     }
   }
 
@@ -75,21 +119,19 @@ export class TransacoesComponent implements OnInit {
       .subscribe();
   }
 
-  private _adicionarGasto(): void {
+  private _adicionarGasto(carteira?: ICarteira, categoria?: ICategoria): void {
     const gasto: Omit<ITransacao, 'id'> = {
       descricao: this.gastoForm.controls.descricao.value,
       valor: this.gastoForm.controls.valor.value,
       tipo: this.gastoForm.controls.tipo.value,
       dataTransacao: this.gastoForm.controls.dataTransacao.value,
+      idCategoria: categoria?.id,
+      tituloCategoria: categoria?.titulo,
+      idCarteira: carteira?.id,
+      tituloCarteira: carteira?.titulo,
       idUsuario: 1,
       ativo: true,
     };
-    if (this.gastoForm.controls.idCategoria.value) {
-      gasto.idCategoria = this.gastoForm.controls.idCategoria.value;
-    }
-    if (this.gastoForm.controls.idCarteira.value) {
-      gasto.idCarteira = this.gastoForm.controls.idCarteira.value;
-    }
 
     this.#gastosService
       .criar(gasto)
@@ -97,22 +139,31 @@ export class TransacoesComponent implements OnInit {
       .subscribe();
   }
 
-  private _editarCategoria(): void {
+  private _editarCategoria(carteira?: ICarteira, categoria?: ICategoria): void {
     const gasto: ITransacao = {
       id: this.gastoForm.controls.id.value,
       descricao: this.gastoForm.controls.descricao.value,
       valor: this.gastoForm.controls.valor.value,
       tipo: this.gastoForm.controls.tipo.value,
       dataTransacao: this.gastoForm.controls.dataTransacao.value,
+      idCategoria: categoria?.id,
+      tituloCategoria: categoria?.titulo,
+      idCarteira: carteira?.id,
+      tituloCarteira: carteira?.titulo,
       idUsuario: 1,
       ativo: true,
     };
     if (this.gastoForm.controls.idCategoria.value) {
-      gasto.idCategoria = this.gastoForm.controls.idCategoria.value;
+      const categoria = this.categoriasOptions().find((c) => c.id === this.gastoForm.controls.idCategoria.value);
+      gasto.idCategoria = categoria?.id;
+      gasto.tituloCategoria = categoria?.titulo;
     }
     if (this.gastoForm.controls.idCarteira.value) {
-      gasto.idCarteira = this.gastoForm.controls.idCarteira.value;
+      const carteira = this.carteirasOptions().find((c) => c.id === this.gastoForm.controls.idCarteira.value);
+      gasto.idCarteira = carteira?.id;
+      gasto.tituloCarteira = carteira?.titulo;
     }
+
     this.#gastosService
       .editar(gasto)
       .pipe(switchMap(() => this._atualizarGastos$()))
@@ -120,6 +171,11 @@ export class TransacoesComponent implements OnInit {
   }
 
   private _atualizarGastos$(): Observable<ITransacao[]> {
-    return this.#gastosService.listar().pipe(tap((data) => this.gastos.set(data)));
+    return this.#gastosService.listar().pipe(
+      tap((data) => {
+        this.gastos.set(data.filter((t) => t.tipo === ETipoTransacao.DEBITO));
+        this.ganhos.set(data.filter((t) => t.tipo === ETipoTransacao.CREDITO));
+      })
+    );
   }
 }
