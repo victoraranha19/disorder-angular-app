@@ -6,12 +6,13 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 import { UsuariosService } from '../../services/usuarios.service';
 import { IUsuarioLogin, IUsuarioRegistro } from '../../shared/interfaces';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  imports: [FormsModule, ReactiveFormsModule, MatInputModule, MatButtonModule, MatTabsModule],
+  imports: [FormsModule, ReactiveFormsModule, MatInputModule, MatButtonModule, MatTabsModule, MatCardModule],
   providers: [UsuariosService],
 })
 export class LoginComponent {

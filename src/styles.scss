@@ -13,11 +13,11 @@ $my-app-dark-theme: mat3.define-colors(
   )
 );
 
-html {
-  @include mat3.all-component-themes($my-app-light-theme);
-}
 body.dark-theme {
   @include mat3.all-component-themes($my-app-dark-theme);
+}
+body.light-theme {
+  @include mat3.all-component-themes($my-app-light-theme);
 }
 
 html,

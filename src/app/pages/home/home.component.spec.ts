@@ -1,24 +1,30 @@
-import { TestBed } from '@angular/core/testing';
-import { App } from './app';
-import { ActivatedRoute } from '@angular/router';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { HomeComponent } from './home.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ActivatedRoute } from '@angular/router';
 
-describe('App', () => {
+describe('HomeComponent', () => {
+  let component: HomeComponent;
+  let fixture: ComponentFixture<HomeComponent>;
+
   let activatedRoute: jasmine.SpyObj<ActivatedRoute>;
 
   beforeEach(async () => {
     activatedRoute = jasmine.createSpyObj('ActivatedRoute', ['snapshot']);
 
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [HomeComponent],
       providers: [{ provide: ActivatedRoute, useValue: activatedRoute }, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
     }).compileComponents();
+
+    fixture = TestBed.createComponent(HomeComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

@@ -1,43 +1,47 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { IUsuarioLogado, IUsuarioLogin, IUsuarioRegistro } from '../shared/interfaces';
 import { catchError, Observable, of, switchMap, tap } from 'rxjs';
+import { ROTAS_API } from '../shared/constants';
 
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
-  private readonly ROTA_LOGIN = '/auth';
-
-  public token = signal<string>('');
+  public usuarioLogado = signal<boolean>(this._verificaUsuarioLogado());
 
   #httpClient = inject(HttpClient);
 
   public registrar$(usuario: IUsuarioRegistro): Observable<IUsuarioLogado> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.#httpClient.post(`${this.ROTA_LOGIN}/register`, usuario, { headers }).pipe(
+    return this.#httpClient.post(`${ROTAS_API}/register`, usuario).pipe(
       switchMap(() => this.logar$({ login: usuario.login, senha: usuario.senha })),
       catchError((err: Error) => {
         console.log(err);
+        this.deslogar();
         return of({ token: '' });
-      })
+      }),
+      tap(() => this.usuarioLogado.set(this._verificaUsuarioLogado()))
     );
   }
 
   public logar$(usuario: IUsuarioLogin): Observable<IUsuarioLogado> {
-    return this.#httpClient.post<IUsuarioLogado>(`${this.ROTA_LOGIN}/login`, usuario).pipe(
+    return this.#httpClient.post<IUsuarioLogado>(`${ROTAS_API}/login`, usuario).pipe(
       tap((usuarioLogado) => {
-        this.token.set(usuarioLogado.token);
+        localStorage.setItem('token', JSON.stringify(usuarioLogado));
       }),
       catchError((err) => {
         console.error(err);
         this.deslogar();
         return of({ token: '' });
-      })
+      }),
+      tap(() => this.usuarioLogado.set(this._verificaUsuarioLogado()))
     );
   }
 
   public deslogar(): void {
-    this.token.set('');
+    localStorage.removeItem('token');
+    this.usuarioLogado.set(this._verificaUsuarioLogado());
   }
 
-  isUsuarioLogado = (): boolean => !!this.token().length;
+  private _verificaUsuarioLogado() {
+    return !!localStorage.getItem('token')?.length;
+  }
 }

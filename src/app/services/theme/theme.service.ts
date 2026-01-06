@@ -7,16 +7,34 @@ export type TTheme = 'light-theme' | 'dark-theme'; // Define os tipos de tema po
   providedIn: 'root',
 })
 export class ThemeService {
-  private renderer: Renderer2;
   private readonly THEME_KEY = 'app-theme'; // Chave para armazenar no localStorage
+  private _themeLoaded = signal(false);
 
   currentTheme = signal<TTheme>('light-theme'); // Signal para o tema atual
 
   readonly #rendererFactory = inject(RendererFactory2);
+  private renderer: Renderer2 = this.#rendererFactory.createRenderer(null, null);
 
-  constructor() {
-    this.renderer = this.#rendererFactory.createRenderer(null, null);
-    this._loadTheme(); // Carrega o tema ao iniciar o serviço
+  /**
+   * Carrega o tema salvo no localStorage ou detecta a preferência do sistema.
+   */
+  public loadTheme(): void {
+    if (this._themeLoaded()) return;
+    const savedTheme = localStorage.getItem(this.THEME_KEY);
+
+    if (savedTheme === 'dark-theme') {
+      this.setTheme('dark-theme');
+    } else if (savedTheme === 'light-theme') {
+      this.setTheme('light-theme');
+    } else {
+      // Se não houver preferência salva, verifica a preferência do sistema
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        this.setTheme('dark-theme'); // Aplica tema escuro se o sistema preferir
+      } else {
+        this.setTheme('light-theme'); // Aplica tema claro por padrão ou se o sistema preferir
+      }
+    }
+    this._themeLoaded.set(true);
   }
 
   /**
@@ -33,11 +51,9 @@ export class ThemeService {
 
   /**
    * Alterna entre o tema claro e escuro.
-   * @param isDarkMode Se true, aplica o tema escuro; se false, aplica o tema claro.
    */
   toggleTheme(): void {
     const isDarkMode = this.currentTheme() === 'dark-theme';
-    console.log('Toggling theme', this.currentTheme(), isDarkMode);
     if (isDarkMode) {
       this.setTheme('light-theme');
     } else {
@@ -51,25 +67,5 @@ export class ThemeService {
    */
   private _saveTheme(theme: TTheme): void {
     localStorage.setItem(this.THEME_KEY, theme);
-  }
-
-  /**
-   * Carrega o tema salvo no localStorage ou detecta a preferência do sistema.
-   */
-  private _loadTheme(): void {
-    const savedTheme = localStorage.getItem(this.THEME_KEY);
-
-    if (savedTheme === 'dark-theme') {
-      this.setTheme('dark-theme');
-    } else if (savedTheme === 'light-theme') {
-      this.setTheme('light-theme');
-    } else {
-      // Se não houver preferência salva, verifica a preferência do sistema
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        this.setTheme('dark-theme'); // Aplica tema escuro se o sistema preferir
-      } else {
-        this.setTheme('light-theme'); // Aplica tema claro por padrão ou se o sistema preferir
-      }
-    }
   }
 }

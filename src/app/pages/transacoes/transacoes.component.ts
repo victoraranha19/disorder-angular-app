@@ -45,7 +45,7 @@ export class TransacoesComponent implements OnInit {
   #categoriasService = inject(CategoriasService);
 
   private readonly _hoje = new Date();
-  mesSelecionado: Date | null = null;
+  mesSelecionado: Date = new Date(this._hoje);
   #dialogRef?: MatDialogRef<HTMLDivElement>;
   ganhos = signal<ITransacao[]>([]);
   gastos = signal<ITransacao[]>([]);

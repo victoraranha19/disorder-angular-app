@@ -12,7 +12,9 @@ form {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  margin-top: 32px;
+  margin: 16px;
+  min-height: 400px;
+  min-width: 400px;
 }
 
 mat-tab-group {
