@@ -6,7 +6,7 @@
     "start": "npm run lint && ng serve",
     "test": "ng test --no-watch --browsers=ChromeHeadlessNoSandbox --code-coverage",
     "test:ci": "ng test --no-watch --no-progress --browsers=ChromeHeadlessNoSandbox",
-    "build": "npm run lint && npm run test:ci && ng build --prod"
+    "build": "npm run lint && npm run test:ci && ng build"
   },
   "private": true,
   "dependencies": {
