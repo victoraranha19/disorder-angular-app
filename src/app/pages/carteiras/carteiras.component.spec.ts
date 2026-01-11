@@ -13,8 +13,8 @@ describe('CarteirasComponent', () => {
   let carteirasSSpy: jasmine.SpyObj<CarteirasService>;
 
   beforeEach(async () => {
-    matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-    carteirasSSpy = jasmine.createSpyObj('CarteirasService', ['criar', 'listar']);
+    matDialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+    carteirasSSpy = jasmine.createSpyObj<CarteirasService>('CarteirasService', ['criar$', 'listar$']);
     carteirasSSpy.listar$.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({

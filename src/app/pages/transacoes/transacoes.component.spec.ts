@@ -3,6 +3,8 @@ import localePt from '@angular/common/locales/pt';
 import { registerLocaleData } from '@angular/common';
 
 import { TransacoesComponent } from './transacoes.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 registerLocaleData(localePt);
 describe('TransacoesComponent', () => {
@@ -12,6 +14,10 @@ describe('TransacoesComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TransacoesComponent],
+      providers: [
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(TransacoesComponent);
