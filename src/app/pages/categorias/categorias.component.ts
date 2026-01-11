@@ -51,13 +51,13 @@ export class CategoriasComponent implements OnInit {
     if (this.categoriaForm.controls.id.value > 0) {
       this._editarCategoria();
     } else {
-      this._criarCategoria()
+      this._criarCategoria();
     }
   }
 
   public excluirCategoria(categoria: ICategoria): void {
     this.#categoriasService
-      .excluir(categoria)
+      .remover$(categoria.id)
       .pipe(switchMap(() => this._atualizarCategorias$()))
       .subscribe();
   }
@@ -67,10 +67,9 @@ export class CategoriasComponent implements OnInit {
       titulo: this.categoriaForm.controls.titulo.value,
       valorPlanejado: this.categoriaForm.controls.valorPlanejado.value,
       idUsuario: 1,
-      ativo: true,
     };
     this.#categoriasService
-      .criar(categoria)
+      .criar$(categoria)
       .pipe(switchMap(() => this._atualizarCategorias$()))
       .subscribe();
   }
@@ -81,15 +80,14 @@ export class CategoriasComponent implements OnInit {
       titulo: this.categoriaForm.controls.titulo.value,
       valorPlanejado: this.categoriaForm.controls.valorPlanejado.value,
       idUsuario: 1,
-      ativo: true,
     };
     this.#categoriasService
-      .editar(categoria)
+      .editar$(categoria)
       .pipe(switchMap(() => this._atualizarCategorias$()))
       .subscribe();
   }
 
   private _atualizarCategorias$(): Observable<ICategoria[]> {
-    return this.#categoriasService.listar().pipe(tap((data) => this.categorias.set(data)));
+    return this.#categoriasService.listar$().pipe(tap((data) => this.categorias.set(data)));
   }
 }

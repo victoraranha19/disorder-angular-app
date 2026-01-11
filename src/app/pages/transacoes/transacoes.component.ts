@@ -10,10 +10,11 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { Observable, switchMap, tap } from 'rxjs';
 
-import { ETipoTransacao, ICarteira, ICategoria, ITransacao } from '../../shared/interfaces';
+import { ICarteira, ICategoria, ITransacao } from '../../shared/interfaces';
 import { TransacoesService } from '../../services/transacoes.service';
 import { CarteirasService } from '../../services/carteiras.service';
 import { CategoriasService } from '../../services/categorias.service';
+import { ETipoCarteira } from '../../shared/enums';
 
 @Component({
   selector: 'app-transacoes',
@@ -37,7 +38,7 @@ import { CategoriasService } from '../../services/categorias.service';
 export class TransacoesComponent implements OnInit {
   modalGasto = viewChild.required<TemplateRef<HTMLDivElement>>('templateModalGasto');
 
-  public readonly ETipoTransacao = ETipoTransacao;
+  public readonly ETipoTransacao = ETipoCarteira;
 
   #matDialog = inject(MatDialog);
   #gastosService = inject(TransacoesService);
@@ -56,7 +57,7 @@ export class TransacoesComponent implements OnInit {
     id: new FormControl<number>(0, { nonNullable: true }),
     descricao: new FormControl<string>('', { nonNullable: true }),
     valor: new FormControl<number>(0, { nonNullable: true }),
-    tipo: new FormControl<ETipoTransacao>(ETipoTransacao.DEBITO, { nonNullable: true }),
+    tipo: new FormControl<ETipoCarteira>(ETipoCarteira.LIMITE_CREDITO, { nonNullable: true }),
     dataTransacao: new FormControl<Date>(this._hoje, { nonNullable: true }),
     parcelas: new FormControl<number>(1, { nonNullable: true }),
     idCarteira: new FormControl<number | null>(null),
@@ -66,15 +67,15 @@ export class TransacoesComponent implements OnInit {
   ngOnInit(): void {
     this._atualizarGastos$().subscribe();
 
-    this.#carteirasService.listar().subscribe((data) => {
+    this.#carteirasService.listar$().subscribe((data) => {
       this.carteirasOptions.set(data);
     });
-    this.#categoriasService.listar().subscribe((data) => {
+    this.#categoriasService.listar$().subscribe((data) => {
       this.categoriasOptions.set(data);
     });
   }
 
-  public abrirModal(gasto?: ITransacao, tipo: ETipoTransacao = ETipoTransacao.DEBITO): void {
+  public abrirModal(gasto?: ITransacao, tipo: ETipoCarteira = ETipoCarteira.LIMITE_CREDITO): void {
     this.gastoForm.reset();
     this.#dialogRef?.close();
 
@@ -108,7 +109,7 @@ export class TransacoesComponent implements OnInit {
 
   public excluirGasto(gasto: ITransacao): void {
     this.#gastosService
-      .excluir(gasto)
+      .remover$(gasto.id)
       .pipe(switchMap(() => this._atualizarGastos$()))
       .subscribe();
   }
@@ -125,11 +126,10 @@ export class TransacoesComponent implements OnInit {
       idCarteira: carteira?.id,
       tituloCarteira: carteira?.titulo,
       idUsuario: 1,
-      ativo: true,
     };
 
     this.#gastosService
-      .criar(gasto)
+      .criar$(gasto)
       .pipe(switchMap(() => this._atualizarGastos$()))
       .subscribe();
   }
@@ -147,7 +147,6 @@ export class TransacoesComponent implements OnInit {
       idCarteira: carteira?.id,
       tituloCarteira: carteira?.titulo,
       idUsuario: 1,
-      ativo: true,
     };
     if (this.gastoForm.controls.idCategoria.value) {
       const categoria = this.categoriasOptions().find((c) => c.id === this.gastoForm.controls.idCategoria.value);
@@ -161,17 +160,16 @@ export class TransacoesComponent implements OnInit {
     }
 
     this.#gastosService
-      .editar(gasto)
+      .editar$(gasto)
       .pipe(switchMap(() => this._atualizarGastos$()))
       .subscribe();
   }
 
   private _atualizarGastos$(): Observable<ITransacao[]> {
-    return this.#gastosService.listar().pipe(
-      tap((data) => {
-        this.gastos.set(data.filter((t) => t.tipo === ETipoTransacao.DEBITO));
-        this.ganhos.set(data.filter((t) => t.tipo === ETipoTransacao.CREDITO));
-      })
+    return this.#gastosService.listar$({ pagina: 1, itensPorPagina: 20, mesAno: '012026' }, 'entradas').pipe(
+      tap((data) => this.gastos.set(data)),
+      switchMap(() => this.#gastosService.listar$({ pagina: 1, itensPorPagina: 20, mesAno: '012026' }, 'saidas')),
+      tap((data) => this.gastos.set(data))
     );
   }
 }

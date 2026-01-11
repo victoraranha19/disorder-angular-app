@@ -1,56 +1,37 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ITransacao } from '../shared/interfaces';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { API_URL_BASE } from '../shared/constants';
 
 @Injectable({ providedIn: 'root' })
 export class TransacoesService {
-  // private readonly ROTA_TRANSACOES = '/transacoes';
-  // #httpClient = inject(HttpClient);
-  // listar() {
-  //   return this.#httpClient.get<ITransacao[]>(`${API_URL_BASE}${this.ROTA_TRANSACOES}`);
-  // }
-  // transacaoPorId(id: string) {
-  //   return this.#httpClient.get<ITransacao>(`${API_URL_BASE}${this.ROTA_TRANSACOES}/${id}`);
-  // }
-  // criar(transacao: Omit<ITransacao, 'id'>) {
-  //   return this.#httpClient.post<ITransacao>(`${API_URL_BASE}${this.ROTA_TRANSACOES}`, transacao);
-  // }
-  // editar(transacao: ITransacao) {
-  //   return this.#httpClient.put<ITransacao>(`${API_URL_BASE}${this.ROTA_TRANSACOES}/${transacao.id}`, transacao);
-  // }
-  // remover(id: number) {
-  //   return this.#httpClient.delete<null>(`${API_URL_BASE}${this.ROTA_TRANSACOES}/${id}`);
-  // }
+  private readonly ROTA_TRANSACOES = '/transacoes';
 
-  private _transacoes = signal<ITransacao[]>([]);
-  public listar(): Observable<ITransacao[]> {
-    return of(
-      this._transacoes()
-        .filter((c) => c.ativo)
-        .sort((a, b) => a.id - b.id)
-    );
-  }
-  public criar(transacao: Omit<ITransacao, 'id'>): Observable<number> {
-    const newId = this._transacoes().length + 1;
-    this._transacoes.update((value) => {
-      const novaTransacao: ITransacao = { ...transacao, id: newId };
-      return value.concat(novaTransacao);
+  #httpClient = inject(HttpClient);
+
+  listar$(params: IRequestTransacaoListagem, tipoTransacao: 'entradas' | 'saidas') {
+    const parametros: HttpParams = new HttpParams();
+    Object.keys(params).forEach((key) => {
+      const value = params[key as keyof IRequestTransacaoListagem];
+      if (value) parametros.set(key, value);
     });
-    return of(newId);
+    return this.#httpClient.get<ITransacao[]>(`${API_URL_BASE}${this.ROTA_TRANSACOES}/${tipoTransacao}`, { params: parametros });
   }
-  public editar(transacao: ITransacao): Observable<null> {
-    const id = transacao.id;
-    this._transacoes.update((value) => {
-      return value.filter((c) => c.id !== id).concat(transacao);
-    });
-    return of(null);
+  criar$(transacao: Omit<ITransacao, 'id'>) {
+    return this.#httpClient.post<ITransacao>(`${API_URL_BASE}${this.ROTA_TRANSACOES}`, transacao);
   }
-  public excluir(transacao: ITransacao): Observable<null> {
-    transacao.ativo = false;
-    const id = transacao.id;
-    this._transacoes.update((value) => {
-      return value.filter((c) => c.id !== id).concat(transacao);
-    });
-    return of(null);
+  editar$(transacao: ITransacao) {
+    return this.#httpClient.put<ITransacao>(`${API_URL_BASE}${this.ROTA_TRANSACOES}/${transacao.id}`, transacao);
   }
+  remover$(id: number) {
+    return this.#httpClient.delete<null>(`${API_URL_BASE}${this.ROTA_TRANSACOES}/${id}`);
+  }
+}
+
+interface IRequestTransacaoListagem {
+  pagina: number;
+  itensPorPagina: number;
+  mesAno: string;
+  carteiraId?: number;
+  categoriaId?: number;
 }

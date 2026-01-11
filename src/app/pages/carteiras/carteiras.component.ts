@@ -28,9 +28,6 @@ export class CarteirasComponent implements OnInit {
   carteiraForm = new FormGroup({
     id: new FormControl<number>(0, { nonNullable: true }),
     titulo: new FormControl<string>('', { nonNullable: true }),
-    contaCorrente: new FormControl<number>(0, { nonNullable: true }),
-    contaPoupanca: new FormControl<number>(0, { nonNullable: true }),
-    contaInvestimento: new FormControl<number>(0, { nonNullable: true }),
     limiteCreditoTotal: new FormControl<number>(0, { nonNullable: true }),
   });
 
@@ -45,9 +42,6 @@ export class CarteirasComponent implements OnInit {
     if (carteira) {
       this.carteiraForm.controls.id.setValue(carteira.id);
       this.carteiraForm.controls.titulo.setValue(carteira.titulo);
-      this.carteiraForm.controls.contaCorrente.setValue(carteira.contaCorrente);
-      this.carteiraForm.controls.contaPoupanca.setValue(carteira.contaPoupanca);
-      this.carteiraForm.controls.contaInvestimento.setValue(carteira.contaInvestimento);
       this.carteiraForm.controls.limiteCreditoTotal.setValue(carteira.limiteCreditoTotal);
     }
     this.#dialogRef = this.#matDialog.open(this.modalCarteira());
@@ -64,7 +58,7 @@ export class CarteirasComponent implements OnInit {
 
   public excluirCarteira(carteira: ICarteira): void {
     this.#carteirasService
-      .excluir(carteira)
+      .remover$(carteira.id)
       .pipe(switchMap(() => this._atualizarCarteiras$()))
       .subscribe();
   }
@@ -72,15 +66,11 @@ export class CarteirasComponent implements OnInit {
   private _criarCarteira(): void {
     const carteira: Omit<ICarteira, 'id'> = {
       titulo: this.carteiraForm.controls.titulo.value,
-      contaCorrente: this.carteiraForm.controls.contaCorrente.value,
-      contaPoupanca: this.carteiraForm.controls.contaPoupanca.value ?? 0,
-      contaInvestimento: this.carteiraForm.controls.contaInvestimento.value ?? 0,
       limiteCreditoTotal: this.carteiraForm.controls.limiteCreditoTotal.value,
       idUsuario: 1,
-      ativo: true,
     };
     this.#carteirasService
-      .criar(carteira)
+      .criar$(carteira)
       .pipe(switchMap(() => this._atualizarCarteiras$()))
       .subscribe();
   }
@@ -89,20 +79,16 @@ export class CarteirasComponent implements OnInit {
     const carteira: ICarteira = {
       id: this.carteiraForm.controls.id.value,
       titulo: this.carteiraForm.controls.titulo.value,
-      contaCorrente: this.carteiraForm.controls.contaCorrente.value,
-      contaPoupanca: this.carteiraForm.controls.contaPoupanca.value,
-      contaInvestimento: this.carteiraForm.controls.contaInvestimento.value,
       limiteCreditoTotal: this.carteiraForm.controls.limiteCreditoTotal.value,
       idUsuario: 1,
-      ativo: true,
     };
     this.#carteirasService
-      .editar(carteira)
+      .editar$(carteira)
       .pipe(switchMap(() => this._atualizarCarteiras$()))
       .subscribe();
   }
 
   private _atualizarCarteiras$(): Observable<ICarteira[]> {
-    return this.#carteirasService.listar().pipe(tap((data) => this.carteiras.set(data)));
+    return this.#carteirasService.listar$().pipe(tap((data) => this.carteiras.set(data)));
   }
 }

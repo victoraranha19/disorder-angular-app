@@ -16,24 +16,6 @@
     </div>
 
     <mat-list>
-      @if (carteira().contaCorrente) {
-        <mat-list-item>
-          <span matListItemTitle>Conta Corrente</span>
-          <span matListItemLine>{{ carteira().contaCorrente | currency: 'BRL' }}</span>
-        </mat-list-item>
-      }
-      @if (carteira().contaPoupanca) {
-        <mat-list-item>
-          <span matListItemTitle>Conta Poupança</span>
-          <span matListItemLine>{{ carteira().contaPoupanca | currency: 'BRL' }}</span>
-        </mat-list-item>
-      }
-      @if (carteira().contaInvestimento) {
-        <mat-list-item>
-          <span matListItemTitle>Conta Investimento</span>
-          <span matListItemLine>{{ carteira().contaInvestimento | currency: 'BRL' }}</span>
-        </mat-list-item>
-      }
       @if (carteira().limiteCreditoTotal) {
         <mat-list-item>
           <span matListItemTitle>Limite de Crédito</span>

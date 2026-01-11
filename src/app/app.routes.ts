@@ -23,6 +23,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/transacoes/transacoes.component').then((c) => c.TransacoesComponent),
         canActivate: [authGuard],
       },
+      {
+        path: 'assessoria',
+        loadComponent: () => import('./pages/assessoria/assessoria.component').then((c) => c.AssessoriaComponent),
+        canActivate: [authGuard],
+      },
       { path: '**', redirectTo: 'carteiras', pathMatch: 'full' },
     ],
   },
