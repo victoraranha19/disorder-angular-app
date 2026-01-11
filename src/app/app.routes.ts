@@ -2,12 +2,12 @@ import { Routes } from '@angular/router';
 import { authGuard } from './services/_guard/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '', redirectTo: 'home' },
   {
     path: 'home',
     loadComponent: () => import('./pages/home/home.component').then((c) => c.HomeComponent),
     children: [
-      { path: '', redirectTo: 'carteiras', pathMatch: 'full' },
+      { path: '', redirectTo: 'carteiras' },
       {
         path: 'carteiras',
         loadComponent: () => import('./pages/carteiras/carteiras.component').then((c) => c.CarteirasComponent),
@@ -32,5 +32,5 @@ export const routes: Routes = [
     ],
   },
   { path: 'login', loadComponent: () => import('./pages/login/login.component').then((c) => c.LoginComponent) },
-  { path: '**', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];
