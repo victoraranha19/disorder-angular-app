@@ -35,7 +35,6 @@ export class UsuariosService {
   }
 
   public verificaUsuarioLogado() {
-    console.log('verificaUsuarioLogado called', !!localStorage.getItem('token')?.length);
     return !!localStorage.getItem('token')?.length;
   }
 }
