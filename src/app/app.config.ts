@@ -7,6 +7,8 @@ import localePt from '@angular/common/locales/pt';
 
 import { routes } from './app.routes';
 import { tokenInterceptor } from './services/_interceptors/token-interceptor';
+import { loadingInterceptor } from './services/_interceptors/loading-interceptor';
+import { errorsInterceptor } from './services/_interceptors/errors-interceptor';
 
 registerLocaleData(localePt);
 export const appConfig: ApplicationConfig = {
@@ -14,7 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withHashLocation()),
-    provideHttpClient(withInterceptors([tokenInterceptor])),
+    provideHttpClient(withInterceptors([tokenInterceptor, loadingInterceptor, errorsInterceptor])),
     provideNativeDateAdapter(),
     { provide: LOCALE_ID, useValue: 'pt-PT' },
     { provide: MAT_DATE_LOCALE, useValue: 'pt-PT' },
