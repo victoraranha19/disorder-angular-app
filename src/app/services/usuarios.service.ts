@@ -16,8 +16,8 @@ export class UsuariosService {
   public registrar$(usuario: IUsuarioRegistro): Observable<IUsuarioLogado> {
     this.deslogar();
     return this.#httpClient
-      .post(`${API_URL_BASE}${this.ROTA_USUARIOS}/register`, usuario)
-      .pipe(switchMap(() => this.logar$({ login: usuario.login, senha: usuario.senha })));
+      .post(`${API_URL_BASE}${this.ROTA_USUARIOS}/registrar`, usuario)
+      .pipe(switchMap(() => this.logar$({ email: usuario.email, senha: usuario.senha })));
   }
 
   public logar$(usuario: IUsuarioLogin): Observable<IUsuarioLogado> {

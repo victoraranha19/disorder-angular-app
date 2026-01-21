@@ -11,5 +11,8 @@ import { LoadingService } from '../../services/loading/loading.service';
 export class LoadingComponent {
   #loadingService = inject(LoadingService);
 
-  isLoading = computed<boolean>(() => this.#loadingService.loading());
+  isLoading = computed<boolean>(() => {
+    console.log('Loading status changed:', this.#loadingService.loading());
+    return this.#loadingService.loading();
+  });
 }

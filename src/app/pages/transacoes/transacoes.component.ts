@@ -36,12 +36,12 @@ import { ETipoCarteira } from '../../shared/enums';
   styleUrl: './transacoes.component.scss',
 })
 export class TransacoesComponent implements OnInit {
-  modalGasto = viewChild.required<TemplateRef<HTMLDivElement>>('templateModalGasto');
+  modalTransacao = viewChild.required<TemplateRef<HTMLDivElement>>('templateModalGasto');
 
   public readonly ETipoTransacao = ETipoCarteira;
 
   #matDialog = inject(MatDialog);
-  #gastosService = inject(TransacoesService);
+  #transacoesService = inject(TransacoesService);
   #carteirasService = inject(CarteirasService);
   #categoriasService = inject(CategoriasService);
 
@@ -53,16 +53,17 @@ export class TransacoesComponent implements OnInit {
   carteirasOptions = signal<ICarteira[]>([]);
   categoriasOptions = signal<ICategoria[]>([]);
 
-  gastoForm = new FormGroup({
+  transacaoForm = new FormGroup({
     id: new FormControl<number>(0, { nonNullable: true }),
     descricao: new FormControl<string>('', { nonNullable: true }),
     valor: new FormControl<number>(0, { nonNullable: true }),
-    tipo: new FormControl<ETipoCarteira>(ETipoCarteira.LIMITE_CREDITO, { nonNullable: true }),
+    tipoCarteira: new FormControl<ETipoCarteira>(ETipoCarteira.LIMITE_CREDITO, { nonNullable: true }),
     dataTransacao: new FormControl<Date>(this._hoje, { nonNullable: true }),
     parcelas: new FormControl<number>(1, { nonNullable: true }),
     idCarteira: new FormControl<number | null>(null),
     idCategoria: new FormControl<number | null>(null),
   });
+  tipoTransacao = new FormControl<'entrada' | 'saida'>('entrada', { nonNullable: true });
 
   ngOnInit(): void {
     this._listarTransacoes$().subscribe();
@@ -75,52 +76,54 @@ export class TransacoesComponent implements OnInit {
     });
   }
 
-  public abrirModal(gasto?: ITransacao, tipo: ETipoCarteira = ETipoCarteira.LIMITE_CREDITO): void {
-    this.gastoForm.reset();
+  public abrirModal(tipoTransacao: 'entrada' | 'saida', transacao?: ITransacao, tipoCarteira: ETipoCarteira = ETipoCarteira.LIMITE_CREDITO): void {
+    this.transacaoForm.reset();
     this.#dialogRef?.close();
 
-    this.gastoForm.controls.tipo.setValue(tipo);
+    this.tipoTransacao.setValue(tipoTransacao);
+    this.transacaoForm.controls.tipoCarteira.setValue(tipoCarteira);
 
-    if (gasto) {
-      this.gastoForm.controls.id.setValue(gasto.id);
-      this.gastoForm.controls.tipo.setValue(gasto.tipo);
-      this.gastoForm.controls.valor.setValue(gasto.valor);
-      this.gastoForm.controls.descricao.setValue(gasto.descricao);
-      this.gastoForm.controls.dataTransacao.setValue(gasto.dataTransacao);
-      this.gastoForm.controls.parcelas.setValue(gasto.parcelas);
-      this.gastoForm.controls.idCarteira.setValue(gasto.idCarteira ?? null);
-      this.gastoForm.controls.idCategoria.setValue(gasto.idCategoria ?? null);
+    if (transacao) {
+      this.transacaoForm.controls.id.setValue(transacao.id);
+      this.transacaoForm.controls.tipoCarteira.setValue(transacao.tipo);
+      this.transacaoForm.controls.valor.setValue(transacao.valor);
+      this.transacaoForm.controls.descricao.setValue(transacao.descricao);
+      this.transacaoForm.controls.dataTransacao.setValue(transacao.dataTransacao);
+      this.transacaoForm.controls.parcelas.setValue(transacao.parcelas);
+      this.transacaoForm.controls.idCarteira.setValue(transacao.idCarteira ?? null);
+      this.transacaoForm.controls.idCategoria.setValue(transacao.idCategoria ?? null);
     }
-    this.#dialogRef = this.#matDialog.open(this.modalGasto());
+    this.#dialogRef = this.#matDialog.open(this.modalTransacao());
   }
 
-  public salvarGasto(): void {
+  public salvarTransacao(): void {
     this.#dialogRef?.close();
 
-    const categoria = this.categoriasOptions().find((c) => c.id === this.gastoForm.controls.idCategoria.value);
-    const carteira = this.carteirasOptions().find((c) => c.id === this.gastoForm.controls.idCarteira.value);
+    const categoria = this.categoriasOptions().find((c) => c.id === this.transacaoForm.controls.idCategoria.value);
+    const carteira = this.carteirasOptions().find((c) => c.id === this.transacaoForm.controls.idCarteira.value);
+    if (this.tipoTransacao.value === 'saida') this.transacaoForm.controls.valor.setValue(this.transacaoForm.controls.valor.value * -1);
 
-    if (this.gastoForm.controls.id.value > 0) {
-      this._editarCategoria(carteira, categoria);
+    if (this.transacaoForm.controls.id.value > 0) {
+      this._editarTransacao(carteira, categoria);
     } else {
-      this._adicionarGasto(carteira, categoria);
+      this._adicionarTransacao(carteira, categoria);
     }
   }
 
-  public excluirGasto(gasto: ITransacao): void {
-    this.#gastosService
-      .remover$(gasto.id)
+  public excluirTransacao(transacao: ITransacao): void {
+    this.#transacoesService
+      .remover$(transacao.id)
       .pipe(switchMap(() => this._listarTransacoes$()))
       .subscribe();
   }
 
-  private _adicionarGasto(carteira?: ICarteira, categoria?: ICategoria): void {
-    const gasto: Omit<ITransacao, 'id'> = {
-      descricao: this.gastoForm.controls.descricao.value,
-      valor: this.gastoForm.controls.valor.value,
-      tipo: this.gastoForm.controls.tipo.value,
-      dataTransacao: this.gastoForm.controls.dataTransacao.value,
-      parcelas: this.gastoForm.controls.parcelas.value,
+  private _adicionarTransacao(carteira?: ICarteira, categoria?: ICategoria): void {
+    const transacao: Omit<ITransacao, 'id'> = {
+      descricao: this.transacaoForm.controls.descricao.value,
+      valor: this.transacaoForm.controls.valor.value,
+      tipo: this.transacaoForm.controls.tipoCarteira.value,
+      dataTransacao: this.transacaoForm.controls.dataTransacao.value,
+      parcelas: this.transacaoForm.controls.parcelas.value,
       idCategoria: categoria?.id,
       tituloCategoria: categoria?.titulo,
       idCarteira: carteira?.id,
@@ -128,47 +131,47 @@ export class TransacoesComponent implements OnInit {
       idUsuario: 1,
     };
 
-    this.#gastosService
-      .criar$(gasto)
+    this.#transacoesService
+      .criar$(transacao)
       .pipe(switchMap(() => this._listarTransacoes$()))
       .subscribe();
   }
 
-  private _editarCategoria(carteira?: ICarteira, categoria?: ICategoria): void {
-    const gasto: ITransacao = {
-      id: this.gastoForm.controls.id.value,
-      descricao: this.gastoForm.controls.descricao.value,
-      valor: this.gastoForm.controls.valor.value,
-      tipo: this.gastoForm.controls.tipo.value,
-      dataTransacao: this.gastoForm.controls.dataTransacao.value,
-      parcelas: this.gastoForm.controls.parcelas.value,
+  private _editarTransacao(carteira?: ICarteira, categoria?: ICategoria): void {
+    const transacao: ITransacao = {
+      id: this.transacaoForm.controls.id.value,
+      descricao: this.transacaoForm.controls.descricao.value,
+      valor: this.transacaoForm.controls.valor.value,
+      tipo: this.transacaoForm.controls.tipoCarteira.value,
+      dataTransacao: this.transacaoForm.controls.dataTransacao.value,
+      parcelas: this.transacaoForm.controls.parcelas.value,
       idCategoria: categoria?.id,
       tituloCategoria: categoria?.titulo,
       idCarteira: carteira?.id,
       tituloCarteira: carteira?.titulo,
       idUsuario: 1,
     };
-    if (this.gastoForm.controls.idCategoria.value) {
-      const categoria = this.categoriasOptions().find((c) => c.id === this.gastoForm.controls.idCategoria.value);
-      gasto.idCategoria = categoria?.id;
-      gasto.tituloCategoria = categoria?.titulo;
+    if (this.transacaoForm.controls.idCategoria.value) {
+      const categoria = this.categoriasOptions().find((c) => c.id === this.transacaoForm.controls.idCategoria.value);
+      transacao.idCategoria = categoria?.id;
+      transacao.tituloCategoria = categoria?.titulo;
     }
-    if (this.gastoForm.controls.idCarteira.value) {
-      const carteira = this.carteirasOptions().find((c) => c.id === this.gastoForm.controls.idCarteira.value);
-      gasto.idCarteira = carteira?.id;
-      gasto.tituloCarteira = carteira?.titulo;
+    if (this.transacaoForm.controls.idCarteira.value) {
+      const carteira = this.carteirasOptions().find((c) => c.id === this.transacaoForm.controls.idCarteira.value);
+      transacao.idCarteira = carteira?.id;
+      transacao.tituloCarteira = carteira?.titulo;
     }
 
-    this.#gastosService
-      .editar$(gasto)
+    this.#transacoesService
+      .editar$(transacao)
       .pipe(tap(() => this._listarTransacoes$()))
       .subscribe();
   }
 
   private _listarTransacoes$() {
-    return this.#gastosService.listar$({ pagina: 0, itensPorPagina: 20, mesAno: '012026' }, 'entradas').pipe(
+    return this.#transacoesService.listar$({ pagina: 0, itensPorPagina: 20, mesAno: '012026' }, 'entradas').pipe(
       tap((data) => this.receitas.set(data.transacoes)),
-      switchMap(() => this.#gastosService.listar$({ pagina: 0, itensPorPagina: 20, mesAno: '012026' }, 'saidas')),
+      switchMap(() => this.#transacoesService.listar$({ pagina: 0, itensPorPagina: 20, mesAno: '012026' }, 'saidas')),
       tap((data) => this.despesas.set(data.transacoes))
     );
   }

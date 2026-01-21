@@ -19,7 +19,6 @@ export class LoginComponent {
   #usuariosService = inject(UsuariosService);
 
   formUsuario = new FormGroup({
-    login: new FormControl<string>(''),
     senha: new FormControl<string>(''),
     nomeCompleto: new FormControl<string>(''),
     email: new FormControl<string>(''),
@@ -27,7 +26,7 @@ export class LoginComponent {
 
   logar() {
     const usuario: IUsuarioLogin = {
-      login: this.formUsuario.controls.login.value ?? '',
+      email: this.formUsuario.controls.email.value ?? '',
       senha: this.formUsuario.controls.senha.value ?? '',
     };
     this.#usuariosService.logar$(usuario).subscribe();
@@ -35,7 +34,6 @@ export class LoginComponent {
 
   criarConta() {
     const usuario: IUsuarioRegistro = {
-      login: this.formUsuario.controls.login.value ?? '',
       senha: this.formUsuario.controls.senha.value ?? '',
       email: this.formUsuario.controls.email.value ?? '',
       nomeCompleto: this.formUsuario.controls.nomeCompleto.value ?? '',

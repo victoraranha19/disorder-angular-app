@@ -10,22 +10,20 @@ import { ETipoCarteira } from './enums';
 
 export interface IUsuario {
   id: number;
-  username: string;
+  email: string;
   senha: string;
   nomeCompleto: string;
-  email: string;
   telefone: string;
   chavePix: string;
   idAcessor?: number;
 }
 export interface IUsuarioRegistro {
-  login: string;
   senha: string;
   nomeCompleto: string;
   email: string;
 }
 export interface IUsuarioLogin {
-  login: string;
+  email: string;
   senha: string;
 }
 export interface IUsuarioLogado {
