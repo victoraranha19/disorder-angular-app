@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withHashLocation()),
-    provideHttpClient(withInterceptors([tokenInterceptor, loadingInterceptor, errorsInterceptor])),
+    provideHttpClient(withInterceptors([loadingInterceptor, tokenInterceptor, errorsInterceptor])),
     provideNativeDateAdapter(),
     { provide: LOCALE_ID, useValue: 'pt-PT' },
     { provide: MAT_DATE_LOCALE, useValue: 'pt-PT' },
