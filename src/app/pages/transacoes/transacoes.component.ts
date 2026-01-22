@@ -164,7 +164,7 @@ export class TransacoesComponent implements OnInit {
 
     this.#transacoesService
       .editar$(transacao)
-      .pipe(tap(() => this._listarTransacoes$()))
+      .pipe(switchMap(() => this._listarTransacoes$()))
       .subscribe();
   }
 

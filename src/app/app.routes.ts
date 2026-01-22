@@ -32,9 +32,12 @@ export const routes: Routes = [
         path: 'assessoria',
         loadComponent: () => import('./pages/assessoria/assessoria.component').then((c) => c.AssessoriaComponent),
         canActivate: [authGuard],
-      }
+      },
+      {
+        path: 'login',
+        loadComponent: () => import('./pages/login/login.component').then((c) => c.LoginComponent),
+      },
     ],
   },
-  { path: 'login', loadComponent: () => import('./pages/login/login.component').then((c) => c.LoginComponent) },
   { path: '**', redirectTo: 'home', pathMatch: 'full' },
 ];

@@ -1,19 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ThemeService } from './services/theme/theme.service';
-import { LoadingComponent } from './components/loading/loading.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LoadingComponent, MatSnackBarModule],
+  imports: [RouterOutlet, MatSnackBarModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {
-  #themeService = inject(ThemeService);
-
-  constructor() {
-    this.#themeService.loadTheme(); // Carrega o tema
-  }
-}
+export class App {}

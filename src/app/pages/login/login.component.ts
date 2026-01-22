@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -13,9 +13,10 @@ import { MatCardModule } from '@angular/material/card';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   imports: [FormsModule, ReactiveFormsModule, MatInputModule, MatButtonModule, MatTabsModule, MatCardModule],
-  providers: [UsuariosService],
 })
 export class LoginComponent {
+  abrirMenu = output();
+
   #usuariosService = inject(UsuariosService);
 
   formUsuario = new FormGroup({
@@ -29,7 +30,7 @@ export class LoginComponent {
       email: this.formUsuario.controls.email.value ?? '',
       senha: this.formUsuario.controls.senha.value ?? '',
     };
-    this.#usuariosService.logar$(usuario).subscribe();
+    this.#usuariosService.logar$(usuario).subscribe(() => this.abrirMenu.emit());
   }
 
   criarConta() {

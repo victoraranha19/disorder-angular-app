@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { IUsuarioLogado, IUsuarioLogin, IUsuarioRegistro } from '../shared/interfaces';
 import { Observable, switchMap, tap } from 'rxjs';
 import { API_URL_BASE } from '../shared/constants';
@@ -8,6 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
   private readonly ROTA_USUARIOS = '/usuarios';
+  public isUsuarioLogado = signal(false);
 
   #httpClient = inject(HttpClient);
   #activatedRoute = inject(ActivatedRoute);
@@ -25,16 +26,21 @@ export class UsuariosService {
     return this.#httpClient.post<IUsuarioLogado>(`${API_URL_BASE}${this.ROTA_USUARIOS}/login`, usuario).pipe(
       tap((usuarioLogado) => {
         localStorage.setItem('token', usuarioLogado.token);
+        this.isUsuarioLogado.set(true);
         void this.#router.navigate([this.#activatedRoute.snapshot.queryParams['returnUrl'] ?? '/']);
       })
     );
   }
 
-  public deslogar(): void {
+  public deslogar(irParaLogin = false, manterUrl = false) {
     localStorage.removeItem('token');
+    this.isUsuarioLogado.set(false);
+    if (irParaLogin) void this.#router.navigate(['/', 'home', 'login'], { queryParams: manterUrl ? { returnUrl: this.#router.url } : null });
   }
 
   public verificaUsuarioLogado() {
-    return !!localStorage.getItem('token')?.length;
+    const isUsuarioLogado = !!localStorage.getItem('token')?.length;
+    this.isUsuarioLogado.set(isUsuarioLogado);
+    return isUsuarioLogado;
   }
 }

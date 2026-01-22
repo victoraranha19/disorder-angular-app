@@ -1,8 +1,8 @@
 <mat-drawer-container style="height: 100vh; width: 100vw">
-  <mat-drawer mode="side" opened>
+  <mat-drawer mode="side" [opened]="abrirMenu()">
     <mat-list style="justify-content: space-between">
       <mat-nav-list>
-        <h1 mat-subheader>DisorderService App</h1>
+        <h1 mat-subheader>Disorder App</h1>
         <div style="padding: 16px 0">
           <mat-divider />
         </div>
@@ -41,13 +41,13 @@
         <div style="padding: 16px 0">
           <mat-divider />
         </div>
-        <a mat-list-item href="javascript:void(0)" (click)="toggleTheme()">
+        <a mat-list-item href="javascript:void(0)" (click)="toggleTheme.emit()">
           <div class="list-item">
             <mat-icon>bedtime</mat-icon>
             <span>Alterar Tema</span>
           </div>
         </a>
-        <a mat-list-item href="javascript:void(0)" (click)="irParaLogin()">
+        <a mat-list-item href="javascript:void(0)" (click)="deslogar()">
           <div class="list-item">
             <mat-icon>logout</mat-icon>
             <span>logout</span>
