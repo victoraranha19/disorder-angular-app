@@ -1,11 +1,10 @@
-// Estilos material
 @use '@angular/material' as mat;
 
 mat-drawer {
   @include mat.sidenav-overrides(
-    (
-      container-width: 300px,
-    )
+      (
+        container-width: 300px,
+      )
   );
 }
 

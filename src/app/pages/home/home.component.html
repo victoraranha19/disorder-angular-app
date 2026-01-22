@@ -1,5 +1,7 @@
 <div class="container">
-  <app-menu>
-    <router-outlet />
-  </app-menu>
+  <app-loading [isLoading]="isLoading()">
+    <app-menu (toggleTheme)="toggleTheme()" [abrirMenu]="isUsuarioLogado()">
+      <router-outlet />
+    </app-menu>
+  </app-loading>
 </div>
